@@ -18,8 +18,6 @@ class Main {
     }
 }
 
-
-
 class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
 
     private class Tree {
