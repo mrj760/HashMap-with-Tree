@@ -133,7 +133,7 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
 
     private List<Tree> trees;
     final int hashSlots;
-    int size = 0;
+    private int size = 0;
 
     HashMap(int hashSlots) {
         if (hashSlots < 1)
