@@ -19,6 +19,12 @@ class Main {
         pl(map.get(7));
 
         pl(map.size());
+        String balance = "{ ";
+        for (int size : map.hashBalance()) {
+            balance += "(" + size + ") ";
+        }
+        balance += "}";
+        pl(balance);
     }
 
     public static void pl(Object o) {
@@ -96,15 +102,15 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
             }
         }
 
-        // int size() {
-        //     return size(head);
-        // }
+        int size() {
+            return size(head);
+        }
 
-        // private int size(Node node) {
-        //     if (node == null)
-        //         return 0;
-        //     return 1 + size(node.left) + size(node.right);
-        // }
+        private int size(Node node) {
+            if (node == null)
+                return 0;
+            return 1 + size(node.left) + size(node.right);
+        }
 
         // return null if does not exist
         V get(K key) {
@@ -131,7 +137,7 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
 
     HashMap(int hashSlots) {
         if (hashSlots < 1)
-            throw new IllegalArgumentException("Size must be greater than 0");
+            throw new IllegalArgumentException("HashSlots must be greater than 0");
         this.hashSlots = hashSlots;
         trees = new ArrayList<Tree>(hashSlots);
         for (int i = 0; i < hashSlots; ++i) {
@@ -163,5 +169,13 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
         // }
         // return size;
         return this.size;
+    }
+
+    public int[] hashBalance() {
+        int[] treeSizes = new int[hashSlots];
+        for (int i = 0; i < hashSlots; ++i) {
+            treeSizes[i] = trees.get(i).size();
+        }
+        return treeSizes;
     }
 }
