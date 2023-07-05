@@ -32,6 +32,12 @@ class Main {
     }
 }
 
+/* 
+    PLAN: Nodes track their parents and also track L/R height.
+    When inserting successfully (not duplicate element),
+    backtrack upwards and increase the L/R height of parent nodes.
+    If L/R height is imbalanced by more than 1, rotate the node.
+*/
 class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
 
     private class Tree {
