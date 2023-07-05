@@ -6,17 +6,18 @@ class Main {
     public static void main(String[] args) {
         HashMap<Integer, String> map = new HashMap<>(3);
 
-        pl(map.insert(4, "four"));
-        pl(map.get(4));
+        insertAndTest(map, 4, "four");
+        insertAndTest(map, 4, "five");
+        insertAndTest(map, 7, "seven");
+        insertAndTest(map, 10, "ten");
+        insertAndTest(map, 13, "thirteen");
+        insertAndTest(map, 16, "sixteen");
 
-        pl(map.insert(4, "five"));
-        pl(map.get(4));
-
-        pl(map.insert(2, "two"));
-        pl(map.get(2));
-
-        pl(map.insert(7, "seven"));
-        pl(map.get(7));
+        insertAndTest(map, 20, "twenty");
+        insertAndTest(map, 17, "seventeen");
+        insertAndTest(map, 14, "fourteen");
+        insertAndTest(map, 11, "eleven");
+        insertAndTest(map, 8, "eight");
 
         pl(map.size());
         String balance = "{ ";
@@ -25,9 +26,20 @@ class Main {
         }
         balance += "}";
         pl(balance);
+
+        pl(map);
+    }
+
+    private static void insertAndTest(HashMap<Integer, String> map, int i, String s) {
+        pl(map.insert(i, s));
+        pl(map.get(i));
     }
 
     public static void pl(Object o) {
+        if (o == null) {
+            System.out.println("NULL");
+            return;
+        }
         System.out.println(o.toString());
     }
 }
@@ -45,6 +57,7 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
         class Node {
             Node left;
             Node right;
+            Node parent;
             K key;
             V val;
             int lh, rh;
@@ -52,6 +65,11 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
             Node(K key, V val) {
                 this.key = key;
                 this.val = val;
+            }
+
+            @Override
+            public String toString() {
+                return "{ K:(" + key + "), V:(" + val + "), LH:" + lh + ", RH:" + rh + "}";
             }
         }
 
@@ -66,24 +84,30 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
 
         // Return false if the element already exists
         boolean insert(K key, V val) {
+
+            // Main.pl("Inserting: {" + key + "," + val + "}");
+
             if (head == null) {
                 head = new Node(key, val);
                 return true;
             }
+
             Node cur = head;
             while (true) {
                 int comp = key.compareTo(cur.key);
                 if (comp < 0) {
                     if (cur.left == null) {
                         cur.left = new Node(key, val);
-                        cur.lh += 1;
+                        cur.left.parent = cur;
+                        backtrackAfterInsertion(cur.left);
                         break;
                     }
                     cur = cur.left;
                 } else if (comp > 0) {
                     if (cur.right == null) {
                         cur.right = new Node(key, val);
-                        cur.rh += 1;
+                        cur.right.parent = cur;
+                        backtrackAfterInsertion(cur.right);
                         break;
                     }
                     cur = cur.right;
@@ -92,6 +116,124 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
                 }
             }
             return true;
+        }
+
+        void backtrackAfterInsertion(Node n) {
+            boolean cameFromLeft = n.key.compareTo(n.parent.key) < 0;
+            n = n.parent;
+            int balance;
+            boolean rotated = false;
+
+            while (true) {
+
+                if (cameFromLeft) {
+                    if (!rotated) {
+                        n.lh++;
+                    } else {
+                        rotated = false;
+                    }
+                } else /* Came From Right */ {
+                    if (!rotated) {
+                        n.rh++;
+                    } else {
+                        rotated = false;
+                    }
+                }
+                balance = n.lh - n.rh;
+                if (balance < -1) {
+                    rotateLeft(n);
+                    rotated = true;
+                } else if (balance > 1) {
+                    rotateRight(n);
+                    rotated = true;
+                }
+
+                if (n == head) {
+                    break;
+                }
+
+                cameFromLeft = n.key.compareTo(n.parent.key) < 0;
+                n = n.parent;
+            }
+        }
+
+        void rotateLeft(Node n) {
+            // Main.pl("before rot: " + n + n.left + n.right + n.right.left + n.right.right);
+            Node temp = n;
+            n = n.right;
+            Node temp2 = n.left;
+            n.left = temp;
+            n.parent = temp.parent;
+
+            temp.parent = n;
+            temp.right = temp2;
+            if (temp2 != null) {
+                temp2.parent = n;
+            }
+
+            updateHeight(temp);
+            updateHeight(n);
+            updateHeight(n.parent);
+
+            // Main.pl("after rot: " + n + n.left + n.right);
+
+            if (temp == head) {
+                head = n;
+            } else {
+                int comp = n.key.compareTo(n.parent.key);
+                if (comp < 0) {
+                    n.parent.left = n;
+                } else {
+                    n.parent.right = n;
+                }
+            }
+        }
+
+        void rotateRight(Node n) {
+            Node temp = n;
+            n = n.left;
+            Node temp2 = n.right;
+            n.right = temp;
+            n.parent = temp.parent;
+            temp.parent = n;
+            temp.left = temp2;
+            if (temp2 != null) {
+                temp2.parent = n;
+            }
+
+            updateHeight(temp);
+            updateHeight(n);
+            updateHeight(n.parent);
+
+            if (temp == head) {
+                head = n;
+            } else {
+                int comp = n.key.compareTo(n.parent.key);
+                if (comp < 0) {
+                    n.parent.left = n;
+                } else {
+                    n.parent.right = n;
+                }
+            }
+        }
+
+        void updateHeight(Node n) {
+            if (n == null) {
+                return;
+            }
+            if (n.left != null) {
+                int max = n.left.lh > n.left.rh ? n.left.lh : n.left.rh;
+                n.lh = max + 1;
+            } else {
+                n.lh = 0;
+            }
+
+            if (n.right != null) {
+                int max = n.right.lh > n.right.rh ? n.right.lh : n.right.rh;
+                n.rh = max + 1;
+            } else {
+                n.rh = 0;
+            }
         }
 
         boolean contains(K key) {
@@ -137,6 +279,25 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
                     return cur.val;
                 }
             }
+        }
+
+        @Override
+        public String toString() {
+            if (head == null) {
+                return "Empty Tree";
+            }
+            return toString(head);
+        }
+
+        private String toString(Node n) {
+            if (n.left == null && n.right == null) {
+                return n.toString();
+            } else if (n.left == null) {
+                return n.toString() + toString(n.right);
+            } else if (n.right == null) {
+                return n.toString() + toString(n.left);
+            }
+            return n.toString() + toString(n.left) + toString(n.right);
         }
     }
 
@@ -186,5 +347,14 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
             treeSizes[i] = trees.get(i).size();
         }
         return treeSizes;
+    }
+
+    @Override
+    public String toString() {
+        String s = "";
+        for (Tree t : trees) {
+            s += t.toString() + "\n";
+        }
+        return s;
     }
 }
