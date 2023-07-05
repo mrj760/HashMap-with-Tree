@@ -20,12 +20,12 @@ class Main {
         insertAndTest(map, 8, "eight");
 
         pl(map.size());
-        String balance = "{ ";
+        String treeSizes = "{ ";
         for (int size : map.hashBalance()) {
-            balance += "(" + size + ") ";
+            treeSizes += "(" + size + ") ";
         }
-        balance += "}";
-        pl(balance);
+        treeSizes += "}";
+        pl(treeSizes);
 
         pl(map);
     }
@@ -167,7 +167,6 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
 
             updateHeight(temp);
             updateHeight(n);
-            updateHeight(n.parent);
 
             // Main.pl("after rot: " + n + n.left + n.right);
 
@@ -180,6 +179,7 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
                 } else {
                     n.parent.right = n;
                 }
+                updateHeight(n.parent);
             }
         }
 
@@ -197,7 +197,6 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
 
             updateHeight(temp);
             updateHeight(n);
-            updateHeight(n.parent);
 
             if (temp == head) {
                 head = n;
@@ -208,6 +207,7 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
                 } else {
                     n.parent.right = n;
                 }
+                updateHeight(n.parent);
             }
         }
 
