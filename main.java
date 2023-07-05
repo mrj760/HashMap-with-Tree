@@ -33,10 +33,9 @@ class Main {
 }
 
 /* 
-    PLAN: Nodes track their parents and also track L/R height.
+    PLAN: Nodes track their L/R height.
     When inserting successfully (not duplicate element),
-    backtrack upwards and increase the L/R height of parent nodes.
-    If L/R height is imbalanced by more than 1, rotate the node.
+    if L/R height is imbalanced by more than 1, rotate the node.
 */
 class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
 
@@ -47,6 +46,7 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
             Node right;
             K key;
             V val;
+            int lh, rh;
 
             Node(K key, V val) {
                 this.key = key;
@@ -75,12 +75,14 @@ class HashMap<K extends Comparable<K>, V> implements Comparator<K> {
                 if (comp < 0) {
                     if (cur.left == null) {
                         cur.left = new Node(key, val);
+                        cur.lh += 1;
                         break;
                     }
                     cur = cur.left;
                 } else if (comp > 0) {
                     if (cur.right == null) {
                         cur.right = new Node(key, val);
+                        cur.rh += 1;
                         break;
                     }
                     cur = cur.right;
